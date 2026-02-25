@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="html-root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baghdad Bites — Fast Food Radar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&family=Noto+Kufi+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════════════════════
+   ROOT & THEME
+══════════════════════════════════════════════════════════ */
+:root {
+  /* New vibrant food-inspired palette — replacing all browns */
+  --red:       #ff3b30;
+  --orange:    #ff9500;
+  --yellow:    #ffd60a;
+  --green:     #30d158;
+  --teal:      #5ac8fa;
+  --blue:      #0a84ff;
+  --purple:    #bf5af2;
+  --pink:      #ff375f;
+
+  /* Accent: bold red-orange food energy */
+  --accent:    #ff6b35;
+  --accent2:   #ffd60a;
+
+  /* Glass layers */
+  --glass-bg:         rgba(255,255,255,0.12);
+  --glass-bg-strong:  rgba(255,255,255,0.20);
+  --glass-bg-card:    rgba(255,255,255,0.10);
+  --glass-border:     rgba(255,255,255,0.25);
+  --glass-border-dim: rgba(255,255,255,0.12);
+  --glass-shadow:     0 8px 32px rgba(0,0,0,0.28);
+  --glass-shadow-lg:  0 20px 60px rgba(0,0,0,0.35);
+
+  --text:      #ffffff;
+  --text-dim:  rgba(255,255,255,0.65);
+  --text-muted:rgba(255,255,255,0.40);
+
+  --blur: 18px;
+  --blur-sm: 10px;
+
+  /* Status colours */
+  --status-new:     rgba(48,209,88,0.2);
+  --status-new-c:   #30d158;
+  --status-rec:     rgba(255,214,10,0.2);
+  --status-rec-c:   #ffd60a;
+  --status-est:     rgba(10,132,255,0.2);
+  --status-est-c:   #5ac8fa;
+}
+
+/* Arabic font stack */
+[lang="ar"] body, [lang="ar"] * {
+  font-family: 'Noto Kufi Arabic', sans-serif !important;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ANIMATED FOOD BACKGROUND
+══════════════════════════════════════════════════════════ */
+.bg-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Rich layered gradient backdrop */
+.bg-gradient {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(180,30,0,0.85) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 90% 10%, rgba(200,80,0,0.7) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 70% at 50% 100%, rgba(100,10,0,0.8) 0%, transparent 60%),
+    radial-gradient(ellipse 90% 80% at 30% 60%, rgba(140,40,0,0.5) 0%, transparent 65%),
+    linear-gradient(160deg, #1a0500 0%, #2d0800 30%, #1c0400 60%, #0f0200 100%);
+}
+
+/* Floating food emoji particles */
+.food-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fp {
+  position: absolute;
+  font-size: 40px;
+  opacity: 0;
+  animation: floatFood linear infinite;
+  filter: blur(0.5px);
+  user-select: none;
+}
+
+@keyframes floatFood {
+  0%   { opacity: 0;    transform: translateY(110vh) rotate(0deg) scale(0.6); }
+  10%  { opacity: 0.12; }
+  50%  { opacity: 0.08; }
+  90%  { opacity: 0.12; }
+  100% { opacity: 0;    transform: translateY(-15vh) rotate(360deg) scale(1.1); }
+}
+
+/* Glowing orbs in background */
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: orbPulse ease-in-out infinite alternate;
+}
+@keyframes orbPulse {
+  from { transform: scale(1) translate(0,0); opacity: 0.6; }
+  to   { transform: scale(1.15) translate(10px, -10px); opacity: 0.9; }
+}
+
+.orb1 { width:500px; height:500px; top:-150px; left:-100px; background: radial-gradient(circle, rgba(255,60,0,0.35), transparent 70%); animation-duration:8s; }
+.orb2 { width:400px; height:400px; top:30%; right:-100px; background: radial-gradient(circle, rgba(255,140,0,0.25), transparent 70%); animation-duration:11s; }
+.orb3 { width:350px; height:350px; bottom:-100px; left:30%; background: radial-gradient(circle, rgba(200,0,50,0.3), transparent 70%); animation-duration:9s; }
+.orb4 { width:300px; height:300px; top:60%; left:-50px; background: radial-gradient(circle, rgba(255,180,0,0.15), transparent 70%); animation-duration:13s; }
+
+/* Overlay to darken background for readability */
+.bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+}
+
+/* ══════════════════════════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════════════════════════ */
+.app {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ══════════════════════════════════════════════════════════
+   GLASS SIDEBAR
+══════════════════════════════════════════════════════════ */
+.sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  border-right: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.sidebar::-webkit-scrollbar { display: none; }
+
+.sidebar-logo {
+  padding: 22px 18px 16px;
+  border-bottom: 1px solid var(--glass-border-dim);
+}
+.logo-mark {
+  font-family: 'Syne', sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+.logo-mark em { color: var(--accent); font-style: normal; }
+.logo-city {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+[lang="ar"] .logo-city { letter-spacing: 1px; }
+
+.sidebar-section {
+  padding: 14px 18px 6px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+[lang="ar"] .sidebar-section { letter-spacing: 1px; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.18s;
+  border-left: 2px solid transparent;
+  border-right: 2px solid transparent;
+}
+[lang="ar"] .nav-item {
+  border-left: 2px solid transparent;
+  border-right: 2px solid transparent;
+  flex-direction: row-reverse;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+.nav-item.active {
+  color: white;
+  background: rgba(255,107,53,0.15);
+  border-left-color: var(--accent);
+}
+[lang="ar"] .nav-item.active {
+  border-left-color: transparent;
+  border-right-color: var(--accent);
+}
+.nav-icon { font-size: 15px; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--accent);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 10px;
+}
+[lang="ar"] .nav-badge { margin-left: 0; margin-right: auto; }
+.nav-badge.green { background: var(--green); }
+
+.sidebar-divider { height: 1px; background: var(--glass-border-dim); margin: 6px 0; }
+
+.filter-group { padding: 6px 18px 10px; }
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+[lang="ar"] .filter-item { flex-direction: row-reverse; }
+.filter-item:hover { color: var(--text-dim); }
+.filter-item.active { color: var(--accent); }
+.filter-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.filter-count { margin-left: auto; font-size: 10px; opacity: 0.5; }
+[lang="ar"] .filter-count { margin-left: 0; margin-right: auto; }
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 14px 18px;
+  border-top: 1px solid var(--glass-border-dim);
+  background: rgba(0,0,0,0.1);
+}
+.sidebar-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+[lang="ar"] .sidebar-stat { flex-direction: row-reverse; }
+.sidebar-stat span:last-child { color: var(--text-dim); font-weight: 600; }
+
+/* ══════════════════════════════════════════════════════════
+   MAIN CONTENT AREA
+══════════════════════════════════════════════════════════ */
+.main { flex: 1; overflow-x: hidden; min-width: 0; }
+
+/* ── TOPBAR ── */
+.topbar {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  border-bottom: 1px solid var(--glass-border-dim);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.search-wrap { flex: 1; position: relative; max-width: 440px; }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; opacity: 0.5; }
+[lang="ar"] .search-icon { left: auto; right: 12px; }
+.search-input {
+  width: 100%;
+  padding: 9px 14px 9px 38px;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(var(--blur-sm));
+  border: 1px solid var(--glass-border);
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s;
+  border-radius: 12px;
+}
+[lang="ar"] .search-input {
+  padding: 9px 38px 9px 14px;
+  font-family: 'Noto Kufi Arabic', sans-serif;
+  text-align: right;
+}
+.search-input:focus { border-color: var(--accent); background: rgba(255,255,255,0.15); }
+.search-input::placeholder { color: rgba(255,255,255,0.4); }
+
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+[lang="ar"] .topbar-right { margin-left: 0; margin-right: auto; }
+
+/* Language toggle */
+.lang-toggle {
+  display: flex;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.lang-btn {
+  padding: 7px 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.18s;
+  letter-spacing: 0.5px;
+}
+.lang-btn.active { background: var(--accent); color: white; }
+
+.topbar-btn {
+  padding: 8px 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.topbar-btn.primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 4px 15px rgba(255,107,53,0.35);
+}
+.topbar-btn.primary:hover { background: #ff8255; box-shadow: 0 4px 20px rgba(255,107,53,0.5); }
+.topbar-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.view-toggle {
+  display: flex;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--glass-border-dim);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.view-btn {
+  padding: 7px 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+.view-btn.active { background: rgba(255,255,255,0.15); color: white; }
+
+/* ── HERO ── */
+.hero {
+  padding: 36px 24px 28px;
+  position: relative;
+  border-bottom: 1px solid var(--glass-border-dim);
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+  background: rgba(255,107,53,0.12);
+  border: 1px solid rgba(255,107,53,0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+[lang="ar"] .hero-eyebrow { letter-spacing: 1px; flex-direction: row-reverse; }
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  animation: livePulse 2s infinite;
+}
+@keyframes livePulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(48,209,88,0.5); }
+  50%      { box-shadow: 0 0 0 6px rgba(48,209,88,0); }
+}
+
+.hero-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(30px, 4.5vw, 48px);
+  font-weight: 800;
+  line-height: 1.05;
+  margin-bottom: 12px;
+  color: white;
+}
+[lang="ar"] .hero-title { font-family: 'Noto Kufi Arabic', sans-serif; }
+.hero-title em { color: var(--accent); font-style: normal; }
+
+.hero-desc { font-size: 13px; color: var(--text-dim); max-width: 480px; line-height: 1.7; margin-bottom: 24px; }
+[lang="ar"] .hero-desc { text-align: right; }
+
+.hero-stats {
+  display: flex;
+  gap: 0;
+  max-width: 480px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--blur-sm));
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.h-stat {
+  flex: 1;
+  text-align: center;
+  padding: 14px 8px;
+  border-right: 1px solid var(--glass-border-dim);
+}
+.h-stat:last-child { border-right: none; }
+.h-stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--accent);
+  display: block;
+  line-height: 1;
+}
+.h-stat-label { font-size: 10px; color: var(--text-muted); margin-top: 3px; display: block; }
+[lang="ar"] .h-stat-label { font-family: 'Noto Kufi Arabic', sans-serif; }
+
+/* ── QUICK FILTERS ── */
+.quick-filters {
+  display: flex;
+  gap: 8px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--glass-border-dim);
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: rgba(0,0,0,0.1);
+}
+.quick-filters::-webkit-scrollbar { display: none; }
+
+.qf-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--blur-sm));
+  border: 1px solid var(--glass-border-dim);
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+[lang="ar"] .qf-chip { font-family: 'Noto Kufi Arabic', sans-serif; }
+.qf-chip:hover { border-color: rgba(255,107,53,0.4); color: white; background: rgba(255,107,53,0.1); }
+.qf-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  box-shadow: 0 4px 15px rgba(255,107,53,0.35);
+}
+
+/* ── CONTENT ── */
+.content { padding: 20px 24px 60px; }
+
+/* Alert banner */
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(48,209,88,0.1);
+  backdrop-filter: blur(var(--blur-sm));
+  border: 1px solid rgba(48,209,88,0.25);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+  font-size: 13px;
+}
+[lang="ar"] .alert-banner { flex-direction: row-reverse; }
+.alert-banner strong { color: var(--green); }
+.alert-banner a { color: var(--accent); text-decoration: none; }
+.alert-dismiss { margin-left: auto; cursor: pointer; color: var(--text-muted); font-size: 16px; }
+[lang="ar"] .alert-dismiss { margin-left: 0; margin-right: auto; }
+
+/* AI Panel */
+.ai-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  border: 1px solid rgba(255,107,53,0.3);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  display: none;
+}
+.ai-panel.visible { display: block; }
+.ai-header {
+  background: rgba(255,107,53,0.12);
+  border-bottom: 1px solid rgba(255,107,53,0.2);
+  padding: 11px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+[lang="ar"] .ai-header { flex-direction: row-reverse; }
+.ai-header-title { font-size: 12px; font-weight: 600; color: white; flex: 1; }
+[lang="ar"] .ai-header-title { text-align: right; font-family: 'Noto Kufi Arabic', sans-serif; }
+.ai-spinner { width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.ai-body { padding: 16px; font-size: 13px; color: var(--text-dim); line-height: 1.8; white-space: pre-wrap; min-height: 50px; }
+[lang="ar"] .ai-body { text-align: right; font-family: 'Noto Kufi Arabic', sans-serif; direction: rtl; }
+.ai-cursor { display: inline-block; width: 2px; height: 13px; background: var(--accent); animation: blinkCur 1s infinite; vertical-align: middle; }
+@keyframes blinkCur { 0%,100%{opacity:1} 50%{opacity:0} }
+.ai-sources { padding: 10px 16px; border-top: 1px solid var(--glass-border-dim); display: flex; gap: 6px; flex-wrap: wrap; }
+[lang="ar"] .ai-sources { flex-direction: row-reverse; }
+.ai-source-chip { padding: 3px 10px; background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border-dim); font-size: 10px; color: var(--text-muted); border-radius: 20px; }
+
+/* Toolbar */
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+[lang="ar"] .toolbar { flex-direction: row-reverse; }
+.result-count { font-size: 13px; color: var(--text-dim); }
+.result-count strong { color: white; }
+.sort-wrap { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); }
+[lang="ar"] .sort-wrap { flex-direction: row-reverse; }
+.sort-select {
+  padding: 6px 10px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--blur-sm));
+  border: 1px solid var(--glass-border);
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+/* Section header */
+.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+[lang="ar"] .section-header { flex-direction: row-reverse; }
+.section-title-text { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 3px; text-transform: uppercase; white-space: nowrap; }
+[lang="ar"] .section-title-text { font-family: 'Noto Kufi Arabic', sans-serif; letter-spacing: 0; }
+.section-line { flex: 1; height: 1px; background: var(--glass-border-dim); }
+
+/* ── CARDS GRID ── */
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+
+/* ════════════════════════════════════════════════════════
+   GLASS CARD — iOS-style glassmorphism
+════════════════════════════════════════════════════════ */
+.card {
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.22s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: cardIn 0.4s ease forwards;
+  box-shadow: var(--glass-shadow);
+  position: relative;
+}
+@keyframes cardIn { to { opacity:1; transform:translateY(0); } }
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+.card:hover {
+  border-color: rgba(255,107,53,0.45);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,107,53,0.2), inset 0 0 30px rgba(255,107,53,0.04);
+  transform: translateY(-3px);
+}
+
+/* Rating color bar at top */
+.card-bar { height: 3px; background: rgba(255,255,255,0.1); }
+.card-bar-fill { height: 100%; width: 0%; transition: width 1.2s ease; border-radius: 0 3px 3px 0; }
+
+.card-top {
+  padding: 16px 16px 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+[lang="ar"] .card-top { flex-direction: row-reverse; }
+
+.card-avatar {
+  width: 46px; height: 46px;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(var(--blur-sm));
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.card-info { flex: 1; min-width: 0; }
+.card-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: white; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+[lang="ar"] .card-name { font-family: 'Noto Kufi Arabic', sans-serif; text-align: right; }
+.card-cuisine { font-size: 11px; color: var(--text-muted); }
+[lang="ar"] .card-cuisine { text-align: right; }
+
+.card-status {
+  padding: 3px 9px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: 20px;
+  flex-shrink: 0;
+  border: 1px solid;
+}
+[lang="ar"] .card-status { letter-spacing: 0; }
+.card-status.new { background: var(--status-new); color: var(--status-new-c); border-color: rgba(48,209,88,0.3); }
+.card-status.recent { background: var(--status-rec); color: var(--status-rec-c); border-color: rgba(255,214,10,0.3); }
+.card-status.established { background: var(--status-est); color: var(--status-est-c); border-color: rgba(90,200,250,0.3); }
+
+.card-rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px 10px;
+}
+[lang="ar"] .card-rating { flex-direction: row-reverse; }
+.stars { color: var(--yellow); font-size: 12px; letter-spacing: 1px; }
+.rating-num { font-size: 12px; font-weight: 600; color: white; }
+.rating-count { font-size: 11px; color: var(--text-muted); }
+.rating-new { font-size: 11px; color: var(--text-muted); font-style: italic; }
+
+.card-divider { height: 1px; background: var(--glass-border-dim); margin: 0 16px; }
+
+.card-details {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex: 1;
+}
+.detail-row { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; }
+[lang="ar"] .detail-row { flex-direction: row-reverse; text-align: right; }
+.detail-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+.detail-text { color: var(--text-dim); line-height: 1.4; flex: 1; }
+.detail-phone { color: var(--accent); font-weight: 600; text-decoration: none; }
+.detail-phone:hover { text-decoration: underline; }
+.unverified { font-size: 10px; color: var(--pink); margin-left: 4px; }
+[lang="ar"] .unverified { margin-left: 0; margin-right: 4px; }
+
+.card-tags { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 16px 12px; }
+[lang="ar"] .card-tags { flex-direction: row-reverse; }
+.tag {
+  padding: 3px 9px;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.08);
+  color: var(--text-dim);
+  border: 1px solid var(--glass-border-dim);
+}
+.tag.halal { background: rgba(48,209,88,0.1); color: var(--green); border-color: rgba(48,209,88,0.2); }
+.tag.delivery { background: rgba(10,132,255,0.1); color: var(--teal); border-color: rgba(10,132,255,0.2); }
+
+.card-actions {
+  display: flex;
+  border-top: 1px solid var(--glass-border-dim);
+}
+[lang="ar"] .card-actions { flex-direction: row-reverse; }
+.card-action {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all 0.15s;
+  border-right: 1px solid var(--glass-border-dim);
+}
+[lang="ar"] .card-action { border-right: none; border-left: 1px solid var(--glass-border-dim); }
+[lang="ar"] .card-action:last-child { border-left: none; }
+.card-action:last-child { border-right: none; }
+.card-action:hover { background: rgba(255,255,255,0.06); color: white; }
+.card-action.primary:hover { background: rgba(255,107,53,0.12); color: var(--accent); }
+
+/* ── LIST VIEW ── */
+.list-view { display: flex; flex-direction: column; gap: 8px; }
+.list-item {
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--blur));
+  border: 1px solid var(--glass-border-dim);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.18s;
+  opacity: 0;
+  animation: cardIn 0.3s ease forwards;
+}
+[lang="ar"] .list-item { flex-direction: row-reverse; }
+.list-item:hover { border-color: rgba(255,107,53,0.3); background: rgba(255,255,255,0.12); }
+.list-avatar { width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.list-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: white; }
+[lang="ar"] .list-name { font-family: 'Noto Kufi Arabic', sans-serif; }
+.list-cuisine { font-size: 11px; color: var(--text-muted); }
+.list-mid { flex: 1; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+[lang="ar"] .list-mid { flex-direction: row-reverse; }
+.list-detail { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-muted); }
+.list-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+/* ── MAP VIEW ── */
+.map-view {
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  overflow: hidden;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--glass-shadow);
+}
+.map-placeholder { text-align: center; color: var(--text-muted); }
+.map-placeholder .icon { font-size: 50px; margin-bottom: 14px; }
+.map-placeholder h3 { font-size: 18px; color: white; margin-bottom: 8px; }
+[lang="ar"] .map-placeholder h3 { font-family: 'Noto Kufi Arabic', sans-serif; }
+.map-placeholder p { font-size: 13px; max-width: 300px; line-height: 1.7; }
+.map-btn { margin-top: 18px; padding: 11px 26px; background: var(--accent); color: white; border: none; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 10px; box-shadow: 0 4px 15px rgba(255,107,53,0.4); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: rgba(20,10,5,0.75);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+  position: relative;
+}
+.modal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 40%);
+  pointer-events: none;
+}
+.modal-header {
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--glass-border-dim);
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+[lang="ar"] .modal-header { flex-direction: row-reverse; }
+.modal-avatar { width: 52px; height: 52px; background: rgba(255,255,255,0.12); border: 1px solid var(--glass-border); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+.modal-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: white; }
+[lang="ar"] .modal-title { font-family: 'Noto Kufi Arabic', sans-serif; }
+.modal-cuisine { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.modal-close { margin-left: auto; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border-dim); color: var(--text-muted); cursor: pointer; width: 30px; height: 30px; border-radius: 8px; font-size: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+[lang="ar"] .modal-close { margin-left: 0; margin-right: auto; }
+.modal-close:hover { color: white; background: rgba(255,255,255,0.15); }
+.modal-body { padding: 20px 22px; }
+.modal-section { margin-bottom: 20px; }
+.modal-section-title { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; }
+[lang="ar"] .modal-section-title { letter-spacing: 0; text-align: right; font-family: 'Noto Kufi Arabic', sans-serif; }
+.modal-row { display: flex; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+[lang="ar"] .modal-row { flex-direction: row-reverse; text-align: right; }
+.modal-row-label { color: var(--text-muted); width: 90px; flex-shrink: 0; }
+.modal-row-val { color: var(--text-dim); flex: 1; }
+.modal-phone-big { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: var(--accent); text-decoration: none; display: block; margin-bottom: 4px; }
+[lang="ar"] .modal-phone-big { direction: ltr; text-align: right; }
+.modal-phone-big:hover { text-decoration: underline; }
+.modal-note { background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border-dim); border-radius: 10px; padding: 12px 14px; font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+[lang="ar"] .modal-note { text-align: right; }
+.modal-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+[lang="ar"] .modal-tags { flex-direction: row-reverse; }
+.modal-tag { padding: 4px 10px; background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border-dim); color: var(--text-dim); font-size: 11px; border-radius: 6px; }
+.modal-socials { display: flex; flex-wrap: wrap; gap: 8px; }
+[lang="ar"] .modal-socials { flex-direction: row-reverse; }
+.modal-social { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border-dim); border-radius: 10px; color: white; text-decoration: none; font-size: 12px; font-weight: 500; transition: all 0.15s; }
+.modal-social:hover { background: rgba(255,107,53,0.15); border-color: rgba(255,107,53,0.3); }
+.modal-actions { display: flex; gap: 8px; padding: 14px 22px 18px; border-top: 1px solid var(--glass-border-dim); }
+[lang="ar"] .modal-actions { flex-direction: row-reverse; }
+.modal-btn { flex: 1; padding: 11px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 12px; border: 1px solid; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.modal-btn.primary { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 15px rgba(255,107,53,0.35); }
+.modal-btn.primary:hover { background: #ff8255; }
+.modal-btn.secondary { background: rgba(255,255,255,0.08); color: var(--text-dim); border-color: var(--glass-border-dim); }
+.modal-btn.secondary:hover { color: white; background: rgba(255,255,255,0.12); }
+
+/* REVIEWS */
+.review-form { background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border-dim); border-radius: 12px; padding: 14px; margin-top: 10px; }
+.star-input { display: flex; gap: 4px; margin-bottom: 10px; cursor: pointer; }
+[lang="ar"] .star-input { flex-direction: row-reverse; }
+.star-input span { font-size: 24px; transition: transform 0.1s; }
+.star-input span:hover { transform: scale(1.2); }
+.review-textarea { width: 100%; padding: 10px 12px; background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border-dim); color: white; font-family: 'DM Sans', sans-serif; font-size: 12px; resize: none; outline: none; border-radius: 8px; height: 80px; margin-bottom: 8px; }
+[lang="ar"] .review-textarea { font-family: 'Noto Kufi Arabic', sans-serif; direction: rtl; text-align: right; }
+.review-textarea:focus { border-color: var(--accent); }
+.review-textarea::placeholder { color: rgba(255,255,255,0.3); }
+.review-submit { padding: 8px 20px; background: var(--accent); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 8px; }
+.review-item { padding: 10px 0; border-bottom: 1px solid var(--glass-border-dim); }
+.review-item:last-child { border-bottom: none; }
+.review-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+[lang="ar"] .review-meta { flex-direction: row-reverse; }
+.review-author { font-size: 12px; font-weight: 600; color: white; }
+.review-stars { font-size: 11px; color: var(--yellow); }
+.review-date { font-size: 10px; color: var(--text-muted); margin-left: auto; }
+[lang="ar"] .review-date { margin-left: 0; margin-right: auto; }
+.review-text { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+[lang="ar"] .review-text { text-align: right; }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: rgba(30,15,5,0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-left: 3px solid var(--accent);
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-size: 13px;
+  color: white;
+  z-index: 999;
+  transform: translateX(120%);
+  transition: transform 0.3s ease;
+  max-width: 300px;
+  box-shadow: var(--glass-shadow);
+}
+[lang="ar"] .toast { right: auto; left: 24px; border-left: 1px solid var(--glass-border); border-right: 3px solid var(--accent); transform: translateX(-120%); }
+.toast.show { transform: translateX(0); }
+.toast-title { font-weight: 600; margin-bottom: 3px; }
+.toast-msg { color: var(--text-dim); font-size: 12px; }
+
+/* EMPTY STATE */
+.empty { text-align: center; padding: 60px 24px; color: var(--text-muted); }
+.empty .icon { font-size: 48px; margin-bottom: 16px; }
+.empty h3 { font-size: 18px; color: white; margin-bottom: 8px; font-family: 'Syne', sans-serif; }
+[lang="ar"] .empty h3 { font-family: 'Noto Kufi Arabic', sans-serif; }
+.empty p { font-size: 13px; line-height: 1.7; max-width: 300px; margin: 0 auto; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .cards-grid { grid-template-columns: 1fr; }
+  .hero-stats { max-width: 100%; }
+  .topbar { padding: 10px 14px; }
+  .content { padding: 16px 14px 50px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ BACKGROUND SCENE ════════════════════════════════════ -->
+<div class="bg-scene">
+  <div class="bg-gradient"></div>
+  <div class="orb1 bg-orb"></div>
+  <div class="orb2 bg-orb"></div>
+  <div class="orb3 bg-orb"></div>
+  <div class="orb4 bg-orb"></div>
+  <div class="food-particles" id="food-particles"></div>
+  <div class="bg-overlay"></div>
+</div>
+
+<!-- ══ APP ════════════════════════════════════════════════ -->
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">Baghdad<em>Bites</em></div>
+      <div class="logo-city" data-en="📍 Fast Food Radar" data-ar="📍 رادار الوجبات السريعة">📍 Fast Food Radar</div>
+    </div>
+
+    <div class="sidebar-section" data-en="Discover" data-ar="اكتشف">Discover</div>
+    <div class="nav-item active" onclick="setNavActive(this); qfFilter('all', null)">
+      <span class="nav-icon">🏠</span>
+      <span data-en="All Restaurants" data-ar="كل المطاعم">All Restaurants</span>
+      <span class="nav-badge" id="nav-total">8</span>
+    </div>
+    <div class="nav-item" onclick="setNavActive(this); qfFilter('new', null)">
+      <span class="nav-icon">✨</span>
+      <span data-en="New Openings" data-ar="افتتاحات جديدة">New Openings</span>
+      <span class="nav-badge green" id="nav-new">3</span>
+    </div>
+    <div class="nav-item" onclick="setNavActive(this); qfFilter('delivery', null)">
+      <span class="nav-icon">🛵</span>
+      <span data-en="Delivery Available" data-ar="توصيل متاح">Delivery Available</span>
+    </div>
+    <div class="nav-item" onclick="setNavActive(this); switchView('map')">
+      <span class="nav-icon">🗺</span>
+      <span data-en="Map View" data-ar="عرض الخريطة">Map View</span>
+    </div>
+
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section" data-en="Categories" data-ar="التصنيفات">Categories</div>
+    <div class="filter-group">
+      <div class="filter-item active" onclick="filterBy('all',this)">
+        <div class="filter-dot" style="background:rgba(255,255,255,0.4)"></div>
+        <span data-en="All Types" data-ar="جميع الأنواع">All Types</span>
+        <span class="filter-count">8</span>
+      </div>
+      <div class="filter-item" onclick="filterBy('burger',this)">
+        <div class="filter-dot" style="background:var(--accent)"></div>
+        <span data-en="🍔 Burgers" data-ar="🍔 برغر">🍔 Burgers</span>
+        <span class="filter-count">3</span>
+      </div>
+      <div class="filter-item" onclick="filterBy('chicken',this)">
+        <div class="filter-dot" style="background:var(--yellow)"></div>
+        <span data-en="🍗 Chicken" data-ar="🍗 دجاج">🍗 Chicken</span>
+        <span class="filter-count">1</span>
+      </div>
+      <div class="filter-item" onclick="filterBy('pizza',this)">
+        <div class="filter-dot" style="background:var(--red)"></div>
+        <span data-en="🍕 Pizza" data-ar="🍕 بيتزا">🍕 Pizza</span>
+        <span class="filter-count">2</span>
+      </div>
+      <div class="filter-item" onclick="filterBy('dessert',this)">
+        <div class="filter-dot" style="background:var(--purple)"></div>
+        <span data-en="🍩 Desserts & Coffee" data-ar="🍩 حلويات وقهوة">🍩 Desserts & Coffee</span>
+        <span class="filter-count">2</span>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section" data-en="Neighborhoods" data-ar="الأحياء">Neighborhoods</div>
+    <div class="filter-group">
+      <div class="filter-item" onclick="filterByArea('jadiriyah',this)">
+        <div class="filter-dot" style="background:var(--teal)"></div>
+        <span data-en="Jadiriyah" data-ar="الجادرية">Jadiriyah</span>
+      </div>
+      <div class="filter-item" onclick="filterByArea('mansour',this)">
+        <div class="filter-dot" style="background:var(--teal)"></div>
+        <span data-en="Mansour" data-ar="المنصور">Mansour</span>
+      </div>
+      <div class="filter-item" onclick="filterByArea('jamia',this)">
+        <div class="filter-dot" style="background:var(--teal)"></div>
+        <span data-en="Jamia Street" data-ar="شارع الجامعة">Jamia Street</span>
+      </div>
+      <div class="filter-item" onclick="filterByArea('yarmouk',this)">
+        <div class="filter-dot" style="background:var(--teal)"></div>
+        <span data-en="Al-Yarmouk" data-ar="اليرموك">Al-Yarmouk</span>
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-stat">
+        <span data-en="Last Updated" data-ar="آخر تحديث">Last Updated</span>
+        <span>Feb 2026</span>
+      </div>
+      <div class="sidebar-stat">
+        <span data-en="Total Chains" data-ar="إجمالي السلاسل">Total Chains</span>
+        <span id="sb-total">8</span>
+      </div>
+      <div class="sidebar-stat">
+        <span data-en="New (2023–25)" data-ar="جديد (2023–25)">New (2023–25)</span>
+        <span id="sb-new">3</span>
+      </div>
+      <div class="sidebar-stat">
+        <span data-en="With Delivery" data-ar="مع توصيل">With Delivery</span>
+        <span>6</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="search-input"
+          data-placeholder-en="Search restaurants, cuisine, neighborhood..."
+          data-placeholder-ar="ابحث عن مطاعم، مطبخ، حي..."
+          placeholder="Search restaurants, cuisine, neighborhood..."
+          oninput="liveSearch(this.value)"
+          onkeydown="if(event.key==='Enter') doAISearch()" />
+      </div>
+      <div class="topbar-right">
+        <!-- Language Toggle -->
+        <div class="lang-toggle">
+          <button class="lang-btn active" id="lang-en" onclick="setLang('en')">EN</button>
+          <button class="lang-btn" id="lang-ar" onclick="setLang('ar')">ع</button>
+        </div>
+        <button class="topbar-btn primary" id="btn-ai" onclick="doAISearch()">
+          🤖 <span data-en="AI Search" data-ar="بحث ذكي">AI Search</span>
+        </button>
+        <div class="view-toggle">
+          <button class="view-btn active" id="vbtn-grid" onclick="switchView('grid')" title="Grid">⊞</button>
+          <button class="view-btn" id="vbtn-list" onclick="switchView('list')" title="List">☰</button>
+          <button class="view-btn" id="vbtn-map" onclick="switchView('map')" title="Map">🗺</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-eyebrow">
+        <div class="live-dot"></div>
+        <span data-en="Live Tracker · Baghdad, Iraq" data-ar="متابع مباشر · بغداد، العراق">Live Tracker · Baghdad, Iraq</span>
+      </div>
+      <h1 class="hero-title">
+        <span data-en="Discover <em>New</em><br>Fast Food in Baghdad" data-ar="اكتشف <em>أحدث</em><br>مطاعم بغداد">
+          Discover <em>New</em><br>Fast Food in Baghdad
+        </span>
+      </h1>
+      <p class="hero-desc" data-en="AI-powered tracker for every new chain opening in Baghdad. Phone numbers, addresses, delivery links and social media — all in one place." data-ar="متتبع مدعوم بالذكاء الاصطناعي لكل افتتاح جديد في بغداد. أرقام الهواتف والعناوين وروابط التوصيل ومواقع التواصل الاجتماعي — كل شيء في مكان واحد.">
+        AI-powered tracker for every new chain opening in Baghdad. Phone numbers, addresses, delivery links and social media — all in one place.
+      </p>
+      <div class="hero-stats">
+        <div class="h-stat">
+          <span class="h-stat-num" id="hs-total">8</span>
+          <span class="h-stat-label" data-en="Chains Tracked" data-ar="سلاسل مُتابَعة">Chains Tracked</span>
+        </div>
+        <div class="h-stat">
+          <span class="h-stat-num" id="hs-new">3</span>
+          <span class="h-stat-label" data-en="New 2023–25" data-ar="جديد 2023–25">New 2023–25</span>
+        </div>
+        <div class="h-stat">
+          <span class="h-stat-num">6</span>
+          <span class="h-stat-label" data-en="Deliver to You" data-ar="يوصل لك">Deliver to You</span>
+        </div>
+        <div class="h-stat">
+          <span class="h-stat-num">4+</span>
+          <span class="h-stat-label" data-en="Neighborhoods" data-ar="أحياء">Neighborhoods</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK FILTERS -->
+    <div class="quick-filters" id="qf-bar">
+      <div class="qf-chip active" onclick="qfFilter('all',this)" data-en="🍽 All" data-ar="🍽 الكل">🍽 All</div>
+      <div class="qf-chip" onclick="qfFilter('new',this)" data-en="✨ New Openings" data-ar="✨ افتتاحات جديدة">✨ New Openings</div>
+      <div class="qf-chip" onclick="qfFilter('burger',this)" data-en="🍔 Burgers" data-ar="🍔 برغر">🍔 Burgers</div>
+      <div class="qf-chip" onclick="qfFilter('chicken',this)" data-en="🍗 Chicken" data-ar="🍗 دجاج">🍗 Chicken</div>
+      <div class="qf-chip" onclick="qfFilter('pizza',this)" data-en="🍕 Pizza" data-ar="🍕 بيتزا">🍕 Pizza</div>
+      <div class="qf-chip" onclick="qfFilter('dessert',this)" data-en="🍩 Desserts" data-ar="🍩 حلويات">🍩 Desserts</div>
+      <div class="qf-chip" onclick="qfFilter('delivery',this)" data-en="🛵 Delivery" data-ar="🛵 توصيل">🛵 Delivery</div>
+      <div class="qf-chip" onclick="qfFilter('halal',this)" data-en="✅ Halal" data-ar="✅ حلال">✅ Halal</div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- Alert banner -->
+      <div class="alert-banner" id="alert-banner">
+        <span style="font-size:18px;flex-shrink:0">🔔</span>
+        <span>
+          <strong data-en="New:" data-ar="جديد:">New:</strong>
+          <span data-en=" Tim Hortons spotted on Jamia Street (2024) — Canada's coffee chain is now in Baghdad!" data-ar=" تيم هورتونز ظهر على شارع الجامعة (2024) — القهوة الكندية وصلت بغداد!"> Tim Hortons spotted on Jamia Street (2024) — Canada's coffee chain is now in Baghdad!</span>
+          <a href="#" onclick="highlightCard(7);return false;" data-en=" View →" data-ar=" عرض →"> View →</a>
+        </span>
+        <span class="alert-dismiss" onclick="document.getElementById('alert-banner').style.display='none'">✕</span>
+      </div>
+
+      <!-- AI Panel -->
+      <div class="ai-panel" id="ai-panel">
+        <div class="ai-header">
+          <span style="font-size:16px">🤖</span>
+          <span class="ai-header-title" id="ai-header-title">Searching...</span>
+          <div class="ai-spinner" id="ai-spinner"></div>
+        </div>
+        <div class="ai-body" id="ai-body"></div>
+        <div class="ai-sources" id="ai-sources"></div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="result-count">
+          <strong id="res-count">8</strong>
+          <span data-en=" restaurants found" data-ar=" مطعم تم إيجاده"> restaurants found</span>
+        </div>
+        <div class="sort-wrap">
+          <span data-en="Sort by:" data-ar="ترتيب حسب:">Sort by:</span>
+          <select class="sort-select" id="sort-sel" onchange="applySort()">
+            <option value="newest" data-en="Newest First" data-ar="الأحدث أولاً">Newest First</option>
+            <option value="alpha" data-en="A – Z" data-ar="أ – ي">A – Z</option>
+            <option value="rating" data-en="Top Rated" data-ar="الأعلى تقييماً">Top Rated</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Section header -->
+      <div class="section-header">
+        <span class="section-title-text" id="section-label" data-en="All Restaurants" data-ar="جميع المطاعم">All Restaurants</span>
+        <div class="section-line"></div>
+      </div>
+
+      <!-- View container -->
+      <div id="view-container"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-title" id="toast-title"></div>
+  <div class="toast-msg" id="toast-msg"></div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   FOOD PARTICLE BACKGROUND
+══════════════════════════════════════════════════════════ */
+(function spawnParticles() {
+  const emojis = ['🍔','🍕','🍗','🌮','🍟','🌯','🍩','☕','🥙','🧆','🫕','🥪','🍖','🧁','🍦','🥤'];
+  const container = document.getElementById('food-particles');
+  for (let i = 0; i < 22; i++) {
+    const fp = document.createElement('div');
+    fp.className = 'fp';
+    fp.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    fp.style.left = Math.random() * 100 + 'vw';
+    fp.style.fontSize = (28 + Math.random() * 30) + 'px';
+    fp.style.animationDuration = (20 + Math.random() * 30) + 's';
+    fp.style.animationDelay = (-Math.random() * 35) + 's';
+    container.appendChild(fp);
+  }
+})();
+
+/* ══════════════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════════════ */
+const DB = [
+  {
+    id:1, name:"Johnny Rockets",
+    nameAr:"جوني روكيتس",
+    cuisine:"American Diner · Burgers", cuisineAr:"دايनر أمريكي · برغر",
+    emoji:"🎸", category:["burger","new","delivery"],
+    status:"new", statusLabel:"New 2023", statusLabelAr:"جديد 2023",
+    opened:"October 2023", openedAr:"أكتوبر 2023",
+    rating:4.3, ratingCount:124,
+    address:"Four Streets, Al-Yarmouk, Baghdad",
+    addressAr:"شارع الأربع، اليرموك، بغداد",
+    area:"yarmouk", phone:"+964 770 000 0000", hours:"12:00 PM – 12:00 AM",
+    social:[{l:"Instagram",u:"https://www.instagram.com/johnnyrockets/",i:"📸"},{l:"Facebook",u:"https://www.facebook.com/JohnnyRockets/",i:"👍"}],
+    delivery:[{l:"Talabat",u:"https://www.talabat.com/iraq",i:"🛵"}],
+    tags:["Halal","Burgers","Shakes","Fries","Dine-in"],
+    tagsAr:["حلال","برغر","ميلك شيك","بطاطس","جلوس داخلي"],
+    note:"First Johnny Rockets in Iraq. Classic 1950s American diner vibe.",
+    noteAr:"أول جوني روكيتس في العراق. أجواء الداينر الأمريكي الكلاسيكي من الخمسينيات.",
+    color:"#ff6b35", verified:false,
+    reviews:[{author:"Ahmed K.",stars:5,text:"Best burgers in Baghdad!",date:"Jan 2025"},{author:"Sara M.",stars:4,text:"Great food, worth the price.",date:"Dec 2024"}]
+  },
+  {
+    id:2, name:"KFC Baghdad", nameAr:"كنتاكي بغداد",
+    cuisine:"Fried Chicken · Fast Food", cuisineAr:"دجاج مقلي · وجبات سريعة",
+    emoji:"🍗", category:["chicken","delivery"],
+    status:"established", statusLabel:"Established", statusLabelAr:"راسخ",
+    opened:"2022", openedAr:"2022",
+    rating:3.9, ratingCount:512,
+    address:"Jadiriyah & Jamia Street, Baghdad", addressAr:"الجادرية وشارع الجامعة، بغداد",
+    area:"jadiriyah", phone:"+964 780 191 0000", hours:"10:00 AM – 12:00 AM",
+    social:[{l:"Instagram",u:"https://www.instagram.com/kfc_iraq/",i:"📸"},{l:"Facebook",u:"https://www.facebook.com/KFCIraq",i:"👍"}],
+    delivery:[{l:"Talabat",u:"https://www.talabat.com/iraq",i:"🛵"},{l:"Lezzoo",u:"https://lezzoo.com",i:"🛵"}],
+    tags:["Halal","Chicken","Delivery","Drive-Thru","Family"],
+    tagsAr:["حلال","دجاج","توصيل","درايف ثرو","عائلي"],
+    note:"Multiple branches across Baghdad. Co-located with Pizza Hut.",
+    noteAr:"فروع متعددة في بغداد. يتشارك الموقع مع بيتزا هت.",
+    color:"#ff3b30", verified:false,
+    reviews:[{author:"Omar T.",stars:4,text:"Consistent quality. The Zinger is always good.",date:"Feb 2025"}]
+  },
+  {
+    id:3, name:"Pizza Hut Baghdad", nameAr:"بيتزا هت بغداد",
+    cuisine:"Pizza · Italian American", cuisineAr:"بيتزا · إيطالي أمريكي",
+    emoji:"🍕", category:["pizza","delivery"],
+    status:"established", statusLabel:"Established", statusLabelAr:"راسخ",
+    opened:"2022", openedAr:"2022",
+    rating:4.0, ratingCount:387,
+    address:"Jadiriyah, Jamia Street & 4 other locations", addressAr:"الجادرية، شارع الجامعة و4 فروع أخرى",
+    area:"jadiriyah", phone:"+964 780 191 0000", hours:"10:00 AM – 12:00 AM",
+    social:[{l:"Instagram",u:"https://www.instagram.com/pizzahutiraq/",i:"📸"}],
+    delivery:[{l:"Talabat",u:"https://www.talabat.com/iraq",i:"🛵"},{l:"Lezzoo",u:"https://lezzoo.com",i:"🛵"}],
+    tags:["Halal","Pizza","5 Branches","Delivery","Family"],
+    tagsAr:["حلال","بيتزا","5 فروع","توصيل","عائلي"],
+    note:"5 Baghdad locations. Co-located with KFC.",
+    noteAr:"5 مواقع في بغداد. يتشارك الموقع مع كنتاكي.",
+    color:"#ff3b30", verified:false,
+    reviews:[{author:"Reem H.",stars:4,text:"Pan pizza here is great. Fast delivery.",date:"Jan 2025"}]
+  },
+  {
+    id:4, name:"Hardee's Iraq", nameAr:"هارديز العراق",
+    cuisine:"Burgers · Breakfast", cuisineAr:"برغر · فطور",
+    emoji:"🍔", category:["burger","delivery"],
+    status:"established", statusLabel:"Established", statusLabelAr:"راسخ",
+    opened:"2018", openedAr:"2018",
+    rating:4.1, ratingCount:298,
+    address:"Jadiriyah, Mansour & multiple branches", addressAr:"الجادرية، المنصور وفروع متعددة",
+    area:"mansour", phone:"+964 770 505 5000", hours:"10:00 AM – 1:00 AM",
+    social:[{l:"Instagram",u:"https://www.instagram.com/hardeesiraq/",i:"📸"},{l:"Facebook",u:"https://www.facebook.com/hardeesiraq",i:"👍"}],
+    delivery:[{l:"Talabat",u:"https://www.talabat.com/iraq",i:"🛵"}],
+    tags:["Halal","Burgers","Breakfast","Drive-Thru","Delivery"],
+    tagsAr:["حلال","برغر","فطور","درايف ثرو","توصيل"],
+    note:"One of the first international chains in Baghdad. Famous for thick burgers.",
+    noteAr:"من أوائل السلاسل الدولية في بغداد. مشهور بالبرغر الكبير.",
+    color:"#ffd60a", verified:false,
+    reviews:[{author:"Khalid S.",stars:5,text:"Best fast food breakfast in Baghdad.",date:"Feb 2025"}]
+  },
+  {
+    id:5, name:"Cinnabon Baghdad", nameAr:"سينابون بغداد",
+    cuisine:"Bakery · Desserts · Coffee", cuisineAr:"مخبز · حلويات · قهوة",
+    emoji:"🍩", category:["dessert","new"],
+    status:"new", statusLabel:"New 2023", statusLabelAr:"جديد 2023",
+    opened:"2023", openedAr:"2023",
+    rating:4.6, ratingCount:203,
+    address:"Jadiriyah, near KFC/Pizza Hut", addressAr:"الجادرية، بجانب كنتاكي وبيتزا هت",
+    area:"jadiriyah", phone:"+964 770 000 0001", hours:"9:00 AM – 11:00 PM",
+    social:[{l:"Instagram",u:"https://www.instagram.com/cinnaboniraq/",i:"📸"}],
+    delivery:[{l:"Talabat",u:"https://www.talabat.com/iraq",i:"🛵"}],
+    tags:["Bakery","Cinnamon Rolls","Coffee","Sweet","Takeaway"],
+    tagsAr:["مخبز","كيك القرفة","قهوة","حلو","سفري"],
+    note:"Opened 2023. Classic cinnamon rolls, iced coffees and frozen drinks.",
+    noteAr:"افتُتح 2023. كيك القرفة الكلاسيكي، القهوة المثلجة والمشروبات الباردة.",
+    color:"#bf5af2", verified:false,
+    reviews:[{author:"Lina F.",stars:5,text:"The pecan rolls are divine!",date:"Jan 2025"}]
+  },
+  {
+    id:6, name:"Chili's Baghdad", nameAr:"تشيليز بغداد",
+    cuisine:"Casual Dining · American Grill", cuisineAr:"مطعم كاجوال · شواء أمريكي",
+    emoji:"🌶️", category:["burger","delivery"],
+    status:"recent", statusLabel:"Recent", statusLabelAr:"حديث",
+    opened:"2022–2023", openedAr:"2022–2023",
+    rating:4.2, ratingCount:176,
+    address:"Jamia Street, Baghdad", addressAr:"شارع الجامعة، بغداد",
+    area:"jamia", phone:"+964 780 600 0000", hours:"12:00 PM – 12:00 AM",
+    social:[{l:"Instagram",u:"https://www.instagram.com/chilisirag/",i:"📸"}],
+    delivery:[{l:"Talabat",u:"https://www.talabat.com/iraq",i:"🛵"}],
+    tags:["Halal","Burgers","Steaks","Ribs","Dine-in"],
+    tagsAr:["حلال","برغر","ستيك","ريب","جلوس داخلي"],
+    note:"Full casual dining experience. Great for family meals.",
+    noteAr:"تجربة داينينج كاملة. مثالي للعائلات.",
+    color:"#ff375f", verified:false,
+    reviews:[{author:"Yusuf A.",stars:4,text:"The ribs are fantastic!",date:"Jan 2025"}]
+  },
+  {
+    id:7, name:"Tim Hortons Iraq", nameAr:"تيم هورتونز العراق",
+    cuisine:"Coffee · Donuts · Breakfast", cuisineAr:"قهوة · دونات · فطور",
+    emoji:"☕", category:["dessert","new","delivery"],
+    status:"new", statusLabel:"New 2024", statusLabelAr:"جديد 2024",
+    opened:"2024", openedAr:"2024",
+    rating:0, ratingCount:0,
+    address:"Jamia Street & Mansour, Baghdad", addressAr:"شارع الجامعة والمنصور، بغداد",
+    area:"jamia", phone:"+964 770 000 0002", hours:"7:00 AM – 11:00 PM",
+    social:[{l:"Instagram",u:"https://www.instagram.com/timhortonsiraq/",i:"📸"}],
+    delivery:[{l:"Talabat",u:"https://www.talabat.com/iraq",i:"🛵"}],
+    tags:["Coffee","Donuts","Breakfast","Canadian","New"],
+    tagsAr:["قهوة","دونات","فطور","كندي","جديد"],
+    note:"Canada's iconic coffee chain arrives in Baghdad.",
+    noteAr:"سلسلة القهوة الكندية الشهيرة تصل إلى بغداد.",
+    color:"#ff3b30", verified:false,
+    reviews:[]
+  },
+  {
+    id:8, name:"Papa John's Baghdad", nameAr:"بابا جونز بغداد",
+    cuisine:"Pizza · Delivery Specialist", cuisineAr:"بيتزا · متخصص بالتوصيل",
+    emoji:"🍕", category:["pizza","delivery"],
+    status:"recent", statusLabel:"Recent", statusLabelAr:"حديث",
+    opened:"2022", openedAr:"2022",
+    rating:3.8, ratingCount:144,
+    address:"Multiple locations, Baghdad", addressAr:"مواقع متعددة، بغداد",
+    area:"mansour", phone:"+964 770 000 0003", hours:"11:00 AM – 1:00 AM",
+    social:[{l:"Instagram",u:"https://www.instagram.com/papajohnsiraq/",i:"📸"}],
+    delivery:[{l:"Talabat",u:"https://www.talabat.com/iraq",i:"🛵"},{l:"Lezzoo",u:"https://lezzoo.com",i:"🛵"}],
+    tags:["Halal","Pizza","Delivery","Garlic Sauce"],
+    tagsAr:["حلال","بيتزا","توصيل","صوص الثوم"],
+    note:"Known for their famous garlic dipping sauce.",
+    noteAr:"مشهور بصوص الثوم المميز.",
+    color:"#ff3b30", verified:false,
+    reviews:[{author:"Hana M.",stars:4,text:"The garlic sauce alone is worth it!",date:"Dec 2024"}]
+  },
+];
+
+/* ══════════════════════════════════════════════════════════
+   STATE & LANGUAGE
+══════════════════════════════════════════════════════════ */
+let LANG = 'en';
+let S = { view:'grid', filter:'all', sort:'newest', search:'', area:null };
+let selectedRating = 0;
+
+/* ══════════════════════════════════════════════════════════
+   LANGUAGE SYSTEM
+══════════════════════════════════════════════════════════ */
+function setLang(lang) {
+  LANG = lang;
+  const html = document.getElementById('html-root');
+  html.lang = lang;
+  html.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+  // Lang buttons
+  document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+  document.getElementById('lang-ar').classList.toggle('active', lang === 'ar');
+
+  // Translate all [data-en] / [data-ar] elements
+  document.querySelectorAll('[data-en]').forEach(el => {
+    const txt = el.getAttribute('data-' + lang);
+    if (txt) {
+      // Handle innerHTML for hero title (contains <em>)
+      if (el.tagName === 'H1' || el.getAttribute('data-html')) {
+        el.querySelector('span') ? el.querySelector('span').innerHTML = txt : el.innerHTML = txt;
+      } else {
+        el.textContent = txt;
+      }
+    }
+  });
+
+  // Hero title special case
+  const heroTitleSpan = document.querySelector('.hero-title span');
+  if (heroTitleSpan) {
+    heroTitleSpan.innerHTML = heroTitleSpan.getAttribute('data-' + lang);
+  }
+
+  // Search placeholder
+  const si = document.getElementById('search-input');
+  si.placeholder = si.getAttribute('data-placeholder-' + lang);
+
+  // Sort options
+  document.querySelectorAll('#sort-sel option').forEach(opt => {
+    if (opt.getAttribute('data-' + lang)) opt.textContent = opt.getAttribute('data-' + lang);
+  });
+
+  // Quick filter chips
+  document.querySelectorAll('.qf-chip[data-' + lang + ']').forEach(chip => {
+    chip.textContent = chip.getAttribute('data-' + lang);
+  });
+
+  // Re-render cards
+  render();
+}
+
+/* ══════════════════════════════════════════════════════════
+   FILTER & SORT
+══════════════════════════════════════════════════════════ */
+function getFiltered() {
+  let d = [...DB];
+  if (S.filter !== 'all') d = d.filter(r => r.category.includes(S.filter));
+  if (S.area) d = d.filter(r => r.area === S.area);
+  if (S.search) {
+    const q = S.search.toLowerCase();
+    d = d.filter(r =>
+      r.name.toLowerCase().includes(q) ||
+      r.nameAr.includes(q) ||
+      r.cuisine.toLowerCase().includes(q) ||
+      r.address.toLowerCase().includes(q) ||
+      r.tags.some(t => t.toLowerCase().includes(q))
+    );
+  }
+  const o = {new:0,recent:1,established:2};
+  if (S.sort === 'newest') d.sort((a,b) => (o[a.status]||0)-(o[b.status]||0));
+  else if (S.sort === 'alpha') d.sort((a,b) => a.name.localeCompare(b.name));
+  else if (S.sort === 'rating') d.sort((a,b) => b.rating - a.rating);
+  return d;
+}
+
+function liveSearch(v) { S.search = v; S.area = null; render(); }
+function filterBy(cat, el) {
+  S.filter = cat; S.area = null;
+  document.querySelectorAll('.sidebar .filter-item').forEach(e => e.classList.remove('active'));
+  if(el) el.classList.add('active');
+  render();
+}
+function filterByArea(area, el) {
+  S.area = S.area === area ? null : area;
+  S.filter = 'all'; S.search = '';
+  document.querySelectorAll('.sidebar .filter-item').forEach(e => e.classList.remove('active'));
+  if(S.area && el) el.classList.add('active');
+  render();
+}
+function qfFilter(cat, el) {
+  S.filter = cat; S.area = null; S.search = '';
+  document.getElementById('search-input').value = '';
+  document.querySelectorAll('.qf-chip').forEach(e => e.classList.remove('active'));
+  if(el) el.classList.add('active');
+  else {
+    document.querySelectorAll('.qf-chip').forEach(chip => {
+      const en = chip.getAttribute('data-en') || '';
+      if(cat === 'all' && en.includes('All')) chip.classList.add('active');
+    });
+  }
+  render();
+}
+function setNavActive(el) {
+  document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+}
+function applySort() { S.sort = document.getElementById('sort-sel').value; render(); }
+function switchView(v) {
+  S.view = v;
+  ['grid','list','map'].forEach(vv => {
+    const b = document.getElementById('vbtn-'+vv);
+    if(b) b.classList.toggle('active', vv === v);
+  });
+  render();
+}
+
+/* ══════════════════════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════════════════════ */
+window.onload = () => { render(); };
+
+function t(en, ar) { return LANG === 'ar' ? ar : en; }
+
+function render() {
+  const data = getFiltered();
+  document.getElementById('res-count').textContent = data.length;
+  const c = document.getElementById('view-container');
+  c.innerHTML = '';
+
+  if (data.length === 0) {
+    c.innerHTML = `<div class="empty"><div class="icon">🍽</div><h3>${t('No restaurants found','لا توجد مطاعم')}</h3><p>${t('Try adjusting filters or use AI Search.','جرب تعديل الفلاتر أو استخدم البحث الذكي.')}</p></div>`;
+    return;
+  }
+
+  if (S.view === 'grid') {
+    const g = document.createElement('div'); g.className = 'cards-grid';
+    data.forEach((r,i) => g.appendChild(buildCard(r,i)));
+    c.appendChild(g);
+  } else if (S.view === 'list') {
+    const l = document.createElement('div'); l.className = 'list-view';
+    data.forEach((r,i) => l.appendChild(buildListItem(r,i)));
+    c.appendChild(l);
+  } else {
+    c.innerHTML = `<div class="map-view"><div class="map-placeholder"><div class="icon">🗺</div><h3>${t('Interactive Map','الخريطة التفاعلية')}</h3><p>${t('View all restaurants plotted on a Baghdad map.','عرض جميع المطاعم على خريطة بغداد.')}</p><button class="map-btn" onclick="openGoogleMaps()">${t('Open in Google Maps →','فتح في خرائط Google →')}</button></div></div>`;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   CARD BUILDER
+══════════════════════════════════════════════════════════ */
+function buildCard(r, idx) {
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.id = 'card-'+r.id;
+  el.style.animationDelay = idx * 55 + 'ms';
+
+  const name = LANG === 'ar' ? r.nameAr : r.name;
+  const cuisine = LANG === 'ar' ? r.cuisineAr : r.cuisine;
+  const address = LANG === 'ar' ? r.addressAr : r.address;
+  const statusLabel = LANG === 'ar' ? r.statusLabelAr : r.statusLabel;
+  const opened = LANG === 'ar' ? r.openedAr : r.opened;
+  const tags = (LANG === 'ar' ? r.tagsAr : r.tags).slice(0,4);
+  const deliveryHtml = r.delivery.map(d =>
+    `<a href="${d.u}" target="_blank" style="color:var(--teal);font-size:11px;text-decoration:none" onclick="event.stopPropagation()">${d.i} ${d.l}</a>`
+  ).join(' · ');
+
+  const starsHtml = r.rating > 0
+    ? `<div class="stars">${'★'.repeat(Math.round(r.rating))}${'☆'.repeat(5-Math.round(r.rating))}</div><span class="rating-num">${r.rating}</span><span class="rating-count">(${r.ratingCount})</span>`
+    : `<span class="rating-new">${t('Be first to review!','كن أول من يقيّم!')}</span>`;
+
+  const tagsHtml = tags.map(tg => {
+    const cls = tg==='Halal'||tg==='حلال' ? 'halal' : tg==='Delivery'||tg==='توصيل' ? 'delivery' : '';
+    return `<span class="tag ${cls}">${tg}</span>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="card-bar"><div class="card-bar-fill" style="background:${r.color}" data-pct="${r.rating>0?(r.rating/5*100).toFixed(0):0}"></div></div>
+    <div class="card-top">
+      <div class="card-avatar">${r.emoji}</div>
+      <div class="card-info">
+        <div class="card-name">${name}</div>
+        <div class="card-cuisine">${cuisine}</div>
+      </div>
+      <div class="card-status ${r.status}">${statusLabel}</div>
+    </div>
+    <div class="card-rating">${starsHtml}</div>
+    <div class="card-divider"></div>
+    <div class="card-details">
+      <div class="detail-row"><span class="detail-icon">📍</span><span class="detail-text">${address}</span></div>
+      <div class="detail-row"><span class="detail-icon">📞</span><span class="detail-text"><a class="detail-phone" href="tel:${r.phone}" onclick="event.stopPropagation()">${r.phone}</a><span class="unverified">${t('⚠verify','⚠تحقق')}</span></span></div>
+      <div class="detail-row"><span class="detail-icon">🕐</span><span class="detail-text">${r.hours}</span></div>
+      <div class="detail-row"><span class="detail-icon">📅</span><span class="detail-text">${t('Opened','افتتح')} ${opened}</span></div>
+      ${deliveryHtml ? `<div class="detail-row"><span class="detail-icon">🛵</span><span class="detail-text">${deliveryHtml}</span></div>` : ''}
+    </div>
+    <div class="card-tags">${tagsHtml}</div>
+    <div class="card-actions">
+      <button class="card-action primary" onclick="openModal(${r.id})">📋 ${t('Details','التفاصيل')}</button>
+      <button class="card-action" onclick="event.stopPropagation();openDirections('${r.address}')">🗺 ${t('Map','خريطة')}</button>
+      <button class="card-action" onclick="event.stopPropagation();aiLookup('${r.name}')">🤖 AI</button>
+    </div>`;
+
+  // Animate rating bar
+  requestAnimationFrame(() => {
+    const bar = el.querySelector('.card-bar-fill');
+    if (bar) setTimeout(() => { bar.style.transition='width 1.2s ease'; bar.style.width=bar.dataset.pct+'%'; }, 200+idx*55);
+  });
+  return el;
+}
+
+/* ══════════════════════════════════════════════════════════
+   LIST ITEM
+══════════════════════════════════════════════════════════ */
+function buildListItem(r, idx) {
+  const el = document.createElement('div');
+  el.className = 'list-item';
+  el.style.animationDelay = idx*40+'ms';
+  const name = LANG==='ar' ? r.nameAr : r.name;
+  const cuisine = LANG==='ar' ? r.cuisineAr : r.cuisine;
+  const status = LANG==='ar' ? r.statusLabelAr : r.statusLabel;
+  const stars = r.rating > 0 ? `${'★'.repeat(Math.round(r.rating))} ${r.rating}` : t('No reviews','لا تقييمات');
+  el.innerHTML = `
+    <div class="list-avatar">${r.emoji}</div>
+    <div><div class="list-name">${name}</div><div class="list-cuisine">${cuisine}</div></div>
+    <div class="list-mid">
+      <div class="list-detail">📍 ${r.address.split(',')[0]}</div>
+      <div class="list-detail">⭐ ${stars}</div>
+      <div class="list-detail">📅 ${r.opened}</div>
+    </div>
+    <div class="list-right">
+      <div class="card-status ${r.status}" style="font-size:9px;padding:2px 7px">${status}</div>
+      <button style="padding:6px 14px;background:rgba(255,107,53,0.15);border:1px solid var(--accent);color:var(--accent);border-radius:8px;cursor:pointer;font-size:11px;font-weight:600" onclick="openModal(${r.id})">${t('View →','عرض →')}</button>
+    </div>`;
+  return el;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════════════════ */
+function openModal(id) {
+  const r = DB.find(x=>x.id===id);
+  if(!r) return;
+  selectedRating = 0;
+  const isAr = LANG === 'ar';
+  const name = isAr ? r.nameAr : r.name;
+  const cuisine = isAr ? r.cuisineAr : r.cuisine;
+  const address = isAr ? r.addressAr : r.address;
+  const note = isAr ? r.noteAr : r.note;
+  const tags = isAr ? r.tagsAr : r.tags;
+  const status = isAr ? r.statusLabelAr : r.statusLabel;
+  const opened = isAr ? r.openedAr : r.opened;
+
+  const reviewsHtml = r.reviews.length
+    ? r.reviews.map(rv=>`<div class="review-item"><div class="review-meta"><span class="review-author">${rv.author}</span><span class="review-stars">${'★'.repeat(rv.stars)}</span><span class="review-date">${rv.date}</span></div><div class="review-text">${rv.text}</div></div>`).join('')
+    : `<div style="font-size:12px;color:var(--text-muted);padding:8px 0">${t('No reviews yet. Be the first!','لا توجد تقييمات بعد. كن الأول!')}</div>`;
+
+  const socialsHtml = [...r.social,...r.delivery].map(s=>`<a class="modal-social" href="${s.u}" target="_blank" rel="noopener">${s.i||'🔗'} ${s.l}</a>`).join('');
+
+  document.getElementById('modal').innerHTML = `
+    <div class="modal-header">
+      <div class="modal-avatar">${r.emoji}</div>
+      <div>
+        <div class="modal-title">${name}</div>
+        <div class="modal-cuisine">${cuisine}</div>
+        <div class="card-status ${r.status}" style="display:inline-block;margin-top:6px;font-size:9px">${status}</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title">📞 ${t('Contact','التواصل')}</div>
+        <a class="modal-phone-big" href="tel:${r.phone}">${r.phone}</a>
+        <div style="font-size:11px;color:var(--pink);margin-bottom:10px">⚠ ${t('Please verify by calling before visiting','يرجى التحقق بالاتصال قبل الزيارة')}</div>
+        <div class="modal-row"><span class="modal-row-label">${t('Address','العنوان')}</span><span class="modal-row-val">${address}</span></div>
+        <div class="modal-row"><span class="modal-row-label">${t('Hours','الأوقات')}</span><span class="modal-row-val">${r.hours}</span></div>
+        <div class="modal-row"><span class="modal-row-label">${t('Opened','افتتح')}</span><span class="modal-row-val">${opened}</span></div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">🔗 ${t('Social & Delivery','التواصل والتوصيل')}</div>
+        <div class="modal-socials">${socialsHtml}</div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">🏷 ${t('Tags','الوسوم')}</div>
+        <div class="modal-tags">${tags.map(tg=>`<span class="modal-tag">${tg}</span>`).join('')}</div>
+      </div>
+      ${note ? `<div class="modal-note">💬 ${note}</div>` : ''}
+      <div class="modal-section" style="margin-top:20px">
+        <div class="modal-section-title">⭐ ${t('Reviews','التقييمات')} (${r.reviews.length})</div>
+        ${reviewsHtml}
+        <div class="review-form">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;font-weight:700">${t('LEAVE A REVIEW','اترك تقييماً')}</div>
+          <div class="star-input" id="star-input-${r.id}" onclick="setRating(this,event)">
+            <span data-v="1">☆</span><span data-v="2">☆</span><span data-v="3">☆</span><span data-v="4">☆</span><span data-v="5">☆</span>
+          </div>
+          <textarea class="review-textarea" id="rv-txt-${r.id}" placeholder="${t('Share your experience...','شاركنا تجربتك...')}"></textarea>
+          <button class="review-submit" onclick="submitReview(${r.id})">${t('Post Review →','نشر التقييم →')}</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn primary" onclick="openDirections('${r.address}')">🗺 ${t('Directions','الاتجاهات')}</button>
+      <button class="modal-btn secondary" onclick="closeModal();aiLookup('${r.name}')">🤖 ${t('AI Search','بحث ذكي')}</button>
+      <button class="modal-btn secondary" onclick="shareR('${name}')">📤 ${t('Share','مشاركة')}</button>
+    </div>`;
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+function setRating(el, event) {
+  const s = event.target.closest('span');
+  if(!s) return;
+  selectedRating = parseInt(s.dataset.v);
+  el.querySelectorAll('span').forEach((sp,i) => sp.textContent = i < selectedRating ? '★' : '☆');
+}
+
+function submitReview(id) {
+  const txt = document.getElementById('rv-txt-'+id)?.value?.trim();
+  if(!selectedRating) { showToast(t('Select Rating','اختر تقييماً'), t('Choose stars first.','اختر النجوم أولاً.')); return; }
+  if(!txt) { showToast(t('Write Something','اكتب شيئاً'), t('Review cannot be empty.','التقييم لا يمكن أن يكون فارغاً.')); return; }
+  const r = DB.find(x=>x.id===id);
+  if(!r) return;
+  r.reviews.unshift({author:t('You','أنت'), stars:selectedRating, text:txt, date:t('Just now','الآن')});
+  r.ratingCount++;
+  r.rating = parseFloat(((r.rating*(r.ratingCount-1)+selectedRating)/r.ratingCount).toFixed(1));
+  showToast(t('Review Posted! 🎉','تم نشر التقييم! 🎉'), t('Thanks for sharing!','شكراً لمشاركتك!'));
+  openModal(id); render();
+}
+
+/* ══════════════════════════════════════════════════════════
+   AI SEARCH
+══════════════════════════════════════════════════════════ */
+async function doAISearch() {
+  const q = document.getElementById('search-input').value.trim() || 'new fast food restaurants Baghdad 2024 2025';
+  await runAI(q, `Search for latest information about fast food restaurants in Baghdad, Iraq matching: "${q}". Include: restaurant name, address/neighborhood, phone number, opening hours, when opened (especially 2023-2025), social media handles, Talabat/Lezzoo availability. Be practical. If phone not found, say so and point to Instagram or Google Maps. ${LANG==='ar'?'Respond in Arabic.':'Respond in English.'}`);
+}
+
+async function aiLookup(name) {
+  document.getElementById('search-input').value = name;
+  await runAI(name, `Find detailed contact info for "${name}" in Baghdad Iraq: current phone numbers, all branch addresses, opening hours, Instagram, Facebook, Talabat/Lezzoo listings, and any 2024-2025 branch openings. ${LANG==='ar'?'Respond in Arabic.':'Respond in English.'}`);
+}
+
+async function runAI(query, prompt) {
+  const panel=document.getElementById('ai-panel');
+  const body=document.getElementById('ai-body');
+  const titleEl=document.getElementById('ai-header-title');
+  const spinner=document.getElementById('ai-spinner');
+  const sources=document.getElementById('ai-sources');
+  const btn=document.getElementById('btn-ai');
+  panel.classList.add('visible');
+  body.textContent=''; sources.innerHTML='';
+  titleEl.textContent = t(`Searching: "${query.slice(0,45)}"...`, `جاري البحث عن: "${query.slice(0,45)}"...`);
+  spinner.style.display='block'; btn.disabled=true;
+  const cursor=document.createElement('span'); cursor.className='ai-cursor'; body.appendChild(cursor);
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,tools:[{type:'web_search_20250305',name:'web_search'}],system:prompt,messages:[{role:'user',content:`Find info about: ${query} in Baghdad Iraq`}]})
+    });
+    const data=await res.json();
+    body.removeChild(cursor);
+    let text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+    if(!text.trim()) text=fallback(query);
+    titleEl.textContent=t(`Results for: "${query.slice(0,45)}"`,`نتائج: "${query.slice(0,45)}"`);
+    spinner.style.display='none';
+    let i=0; const iv=setInterval(()=>{body.textContent=text.slice(0,i); i+=4; if(i>text.length){body.textContent=text;clearInterval(iv);}},10);
+    ['Google Search','Instagram','Talabat Iraq','Google Maps'].forEach(s=>{const c=document.createElement('div');c.className='ai-source-chip';c.textContent='🔍 '+s;sources.appendChild(c);});
+  } catch(e) {
+    body.removeChild(cursor); spinner.style.display='none';
+    titleEl.textContent=t('Search complete','اكتمل البحث');
+    body.textContent=fallback(query);
+  }
+  btn.disabled=false;
+}
+
+function fallback(q) {
+  return LANG==='ar'
+    ? `للعثور على "${q}" في بغداد:\n\n📱 إنستغرام — ابحث عن "@[اسم المطعم]iraq"\n🛵 طلبات العراق — talabat.com/iraq\n🗺 خرائط Google — ابحث عن "${q} بغداد"\n📘 فيسبوك — معظم المطاعم لديها صفحات فيسبوك نشطة`
+    : `To find "${q}" in Baghdad:\n\n📱 Instagram — Search "@[name]iraq"\n🛵 Talabat Iraq — talabat.com/iraq\n🗺 Google Maps — Search "${q} Baghdad"\n📘 Facebook — Most Baghdad restaurants have active pages`;
+}
+
+/* ══════════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════════ */
+function highlightCard(id) {
+  qfFilter('all',null); render();
+  setTimeout(()=>{
+    const el=document.getElementById('card-'+id);
+    if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.outline='2px solid var(--accent)';setTimeout(()=>el.style.outline='',2000);}
+  },200);
+}
+function openDirections(addr) { window.open('https://maps.google.com/?q='+encodeURIComponent(addr+', Baghdad, Iraq'),'_blank'); }
+function openGoogleMaps() { window.open('https://maps.google.com/?q=fast+food+restaurants+Baghdad+Iraq','_blank'); }
+function shareR(name) {
+  if(navigator.share){navigator.share({title:name+' — Baghdad Bites',url:window.location.href});}
+  else{navigator.clipboard.writeText(window.location.href).then(()=>showToast(t('Link Copied!','تم نسخ الرابط!'),t('Share it with friends.','شاركه مع أصدقائك.')));}
+}
+function showToast(title,msg) {
+  const t=document.getElementById('toast');
+  document.getElementById('toast-title').textContent=title;
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
